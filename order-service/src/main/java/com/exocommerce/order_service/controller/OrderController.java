@@ -3,6 +3,7 @@ package com.exocommerce.order_service.controller;
 import com.exocommerce.order_service.entity.Order;
 import com.exocommerce.order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,4 +40,10 @@ public class OrderController {
         orderService.deleteOrder(id);
         return "Order deleted successfully!";
     }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable Long userId) {
+        List<Order> orders = orderService.getOrdersByUserId(userId);
+        return ResponseEntity.ok(orders);
+    }
+
 }
