@@ -1,4 +1,4 @@
-package com.exocommmerce.auth_service;
+package com.exocommerce.auth_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

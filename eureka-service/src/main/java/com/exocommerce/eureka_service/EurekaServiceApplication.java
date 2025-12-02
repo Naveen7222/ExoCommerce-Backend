@@ -10,6 +10,6 @@ public class EurekaServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(EurekaServiceApplication.class, args);
-        System.out.println("✅ Eureka Server started at http://localhost:8761");
+        System.out.println("Eureka Server started at http://localhost:8761");
     }
 }

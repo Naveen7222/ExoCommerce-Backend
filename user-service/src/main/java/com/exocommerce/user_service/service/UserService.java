@@ -1,44 +1,18 @@
 package com.exocommerce.user_service.service;
 
-import com.exocommerce.user_service.model.User;
-import com.exocommerce.user_service.repository.UserRepository;
-import org.springframework.stereotype.Service;
+import com.exocommerce.user_service.dto.UserDTO;
 
 import java.util.List;
-import java.util.Optional;
 
-@Service
-public class UserService {
+public interface UserService {
 
-    private final UserRepository userRepository;
+    UserDTO createUser(UserDTO userDTO);
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    List<UserDTO> getAllUsers();
 
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
+    UserDTO getUserById(Long id);
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+    UserDTO updateUser(Long id, UserDTO userDTO);
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
-    }
-
-    public User updateUser(Long id, User updatedUser) {
-        return userRepository.findById(id).map(user -> {
-            user.setName(updatedUser.getName());
-            user.setEmail(updatedUser.getEmail());
-            user.setPassword(updatedUser.getPassword());
-            user.setRole(updatedUser.getRole());
-            return userRepository.save(user);
-        }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
-    }
-
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
+    void deleteUser(Long id);
 }

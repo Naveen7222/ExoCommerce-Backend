@@ -7,6 +7,10 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +23,16 @@ public class User {
     private Long id;
 
     private String name;
-    private String email;
-    private String password;
-    private String role; // e.g., USER, ADMIN
+    private String email;  // for display only; real email lives in Auth Service
+    private String phone;
+    private String address;
+    private String profileImg;
+    private Long authUserId;
+
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
