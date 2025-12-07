@@ -11,4 +11,6 @@ public interface AuthService
     String login(String email, String password);
 
     Map<String, Object> register(RegisterRequest request);
+    void promoteUserToAdmin(String name, String email);
+
 }

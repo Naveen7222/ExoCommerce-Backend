@@ -6,12 +6,13 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.function.Function;
 
 @Component
 public class JwtUtil {
 
     private final String SECRET = "EXO_SECRET_KEY_123_EXO_SECRET_KEY_123"; // min 32 chars
-    private final long EXPIRATION = 1000 * 60 * 60 * 24;
+    private final long EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
 
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
@@ -30,12 +31,12 @@ public class JwtUtil {
 
     // READ EMAIL FROM TOKEN
     public String extractEmail(String token) {
-        return extractAllClaims(token).getSubject();
+        return extractClaim(token, Claims::getSubject);
     }
 
-    // READ ROLE IF NEEDED
+    // READ ROLE FROM TOKEN
     public String extractRole(String token) {
-        return extractAllClaims(token).get("role", String.class);
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     // VERIFY TOKEN VALID
@@ -48,6 +49,12 @@ public class JwtUtil {
         }
     }
 
+    // GENERIC CLAIM EXTRACTION
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
     // INTERNAL CLAIM PARSER
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
@@ -56,4 +63,5 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 }

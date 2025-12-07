@@ -27,4 +27,8 @@ public class Product {
     private Integer stock;
 
     private String imageUrl;
+
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String imageData;
 }

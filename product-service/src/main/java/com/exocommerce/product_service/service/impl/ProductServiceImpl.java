@@ -24,6 +24,7 @@ public class ProductServiceImpl implements ProductService {
                 .price(p.getPrice())
                 .stock(p.getStock())
                 .imageUrl(p.getImageUrl())
+                .imageData(p.getImageData())
                 .build();
     }
 
@@ -34,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
                 .price(dto.getPrice())
                 .stock(dto.getStock())
                 .imageUrl(dto.getImageUrl())
+                .imageData(dto.getImageData())
                 .build();
     }
 
@@ -66,7 +68,9 @@ public class ProductServiceImpl implements ProductService {
         p.setPrice(dto.getPrice());
         p.setStock(dto.getStock());
         p.setImageUrl(dto.getImageUrl());
-
+        if (dto.getImageData() != null) {
+            p.setImageData(dto.getImageData());
+        }
         return toDto(productRepository.save(p));
     }
 

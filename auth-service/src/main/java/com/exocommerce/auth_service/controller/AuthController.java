@@ -22,15 +22,9 @@ public class AuthController {
         return ResponseEntity.ok(authService.register(request));
     }
 
-
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         String token = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(Map.of("token", token)); // return JWT token
-    }
-    @GetMapping("/test")
-    public String test() {
-        return "Auth Service is working!";
     }
 }
