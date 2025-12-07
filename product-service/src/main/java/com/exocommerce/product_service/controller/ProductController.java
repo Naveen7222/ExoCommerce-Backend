@@ -5,6 +5,7 @@ import com.exocommerce.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,8 +17,10 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductDto> create(@RequestBody ProductDto dto) {
-        return ResponseEntity.ok(productService.createProduct(dto));
+    public ResponseEntity<ProductDto> create(
+            @RequestPart("product") ProductDto dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(productService.createProduct(dto, image));
     }
 
     @GetMapping("/{id}")
@@ -31,8 +34,11 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> update(@PathVariable Long id, @RequestBody ProductDto dto) {
-        return ResponseEntity.ok(productService.updateProduct(id, dto));
+    public ResponseEntity<ProductDto> update(
+            @PathVariable Long id,
+            @RequestPart("product") ProductDto dto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(productService.updateProduct(id, dto, image));
     }
 
     @DeleteMapping("/{id}")

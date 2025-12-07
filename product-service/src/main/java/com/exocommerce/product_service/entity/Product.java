@@ -29,6 +29,8 @@ public class Product {
     private String imageUrl;
 
 
-    @Column(columnDefinition = "LONGTEXT")
-    private String imageData;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] imageData;
+
 }
