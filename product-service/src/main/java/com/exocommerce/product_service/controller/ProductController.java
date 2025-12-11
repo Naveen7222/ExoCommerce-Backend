@@ -12,13 +12,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<ProductDto> create(
-            @RequestPart("product") ProductDto dto,
+            @RequestPart("dto") ProductDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.ok(productService.createProduct(dto, image));
     }
@@ -33,10 +34,10 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<ProductDto> update(
             @PathVariable Long id,
-            @RequestPart("product") ProductDto dto,
+            @RequestPart("dto") ProductDto dto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         return ResponseEntity.ok(productService.updateProduct(id, dto, image));
     }
