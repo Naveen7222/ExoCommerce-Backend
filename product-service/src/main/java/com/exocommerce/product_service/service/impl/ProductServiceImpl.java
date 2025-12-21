@@ -1,14 +1,18 @@
 package com.exocommerce.product_service.service.impl;
 
+import com.exocommerce.product_service.dto.ProductCartDto;
 import com.exocommerce.product_service.dto.ProductDto;
+import com.exocommerce.product_service.entity.Category;
 import com.exocommerce.product_service.entity.Product;
 import com.exocommerce.product_service.exception.ResourceNotFoundException;
+import com.exocommerce.product_service.repository.CategoryRepository;
 import com.exocommerce.product_service.repository.ProductRepository;
 import com.exocommerce.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -16,98 +20,135 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    private ProductDto toDto(Product p) {
+    /* ===================== MAPPERS ===================== */
+
+    private ProductDto toDto(Product product) {
         return ProductDto.builder()
-                .id(p.getId())
-                .name(p.getName())
-                .description(p.getDescription())
-                .price(p.getPrice())
-                .stock(p.getStock())
-                .imageUrl(p.getImageUrl())
-                .imageData(p.getImageData() != null ? new String(p.getImageData()) : null)
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .imageBase64(
+                        product.getImageData() != null
+                                ? Base64.getEncoder().encodeToString(product.getImageData())
+                                : null
+                )
+                .categoryId(
+                        product.getCategory() != null
+                                ? product.getCategory().getId()
+                                : null
+                )
+                .categoryName(
+                        product.getCategory() != null
+                                ? product.getCategory().getName()
+                                : null
+                )
                 .build();
     }
 
     private Product toEntity(ProductDto dto) {
-        return Product.builder()
+        Product product = Product.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .price(dto.getPrice())
                 .stock(dto.getStock())
-                .imageUrl(dto.getImageUrl())
-                .imageData(dto.getImageData() != null ? dto.getImageData().getBytes() : null)
                 .build();
+
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() ->
+                            new RuntimeException("Category not found with id: " + dto.getCategoryId()));
+            product.setCategory(category);
+        }
+
+        return product;
     }
+
+    /* ===================== CRUD ===================== */
 
     @Override
     public ProductDto createProduct(ProductDto dto, MultipartFile image) {
         Product product = toEntity(dto);
+
         if (image != null && !image.isEmpty()) {
             try {
                 product.setImageData(image.getBytes());
-                product.setImageUrl(image.getOriginalFilename());
             } catch (Exception e) {
                 throw new RuntimeException("Failed to process image", e);
             }
         }
+
         return toDto(productRepository.save(product));
     }
-
 
     @Override
     public ProductDto getProductById(Long id) {
         return productRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Product not found"));
     }
 
     @Override
     public List<ProductDto> getAllProducts() {
         return productRepository.findAll()
-                .stream().map(this::toDto).toList();
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Override
     public ProductDto updateProduct(Long id, ProductDto dto, MultipartFile image) {
-        Product p = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Product not found"));
 
-        p.setName(dto.getName());
-        p.setDescription(dto.getDescription());
-        p.setPrice(dto.getPrice());
-        p.setStock(dto.getStock());
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() ->
+                            new RuntimeException("Category not found with id: " + dto.getCategoryId()));
+            product.setCategory(category);
+        }
 
         if (image != null && !image.isEmpty()) {
             try {
-                p.setImageData(image.getBytes());
-                p.setImageUrl(image.getOriginalFilename());
+                product.setImageData(image.getBytes());
             } catch (Exception e) {
                 throw new RuntimeException("Failed to process image", e);
             }
-        } else if (dto.getImageUrl() != null) {
-            p.setImageUrl(dto.getImageUrl());
-            // If imageUrl is provided but no new image, keep the existing imageData
-            if (dto.getImageData() == null) {
-                p.setImageData(null);
-            } else {
-                p.setImageData(dto.getImageData().getBytes());
-            }
-        } else {
-            // If no image or imageUrl is provided, clear both
-            p.setImageData(null);
-            p.setImageUrl(null);
         }
+        // else → keep existing imageData
 
-        return toDto(productRepository.save(p));
+        return toDto(productRepository.save(product));
     }
-
 
     @Override
     public void deleteProduct(Long id) {
-        if (!productRepository.existsById(id))
+        if (!productRepository.existsById(id)) {
             throw new ResourceNotFoundException("Product not found");
-
+        }
         productRepository.deleteById(id);
     }
+    @Override
+    public ProductCartDto getCartProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        return ProductCartDto.builder()
+                .name(product.getName())
+                .price(product.getPrice())
+                .imageBase64(product.getImageData() != null
+                        ? Base64.getEncoder().encodeToString(product.getImageData())
+                        : null)
+                .build();
+    }
+
 }

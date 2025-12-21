@@ -2,7 +2,6 @@ package com.exocommerce.product_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 @Entity
 @Getter
 @Setter
@@ -26,11 +25,12 @@ public class Product {
 
     private Integer stock;
 
-    private String imageUrl;
-
-
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] imageData;
 
+    // NEW: Add category relationship
+    @ManyToOne
+    @JoinColumn(name = "category_id") // FK column in products table
+    private Category category;
 }

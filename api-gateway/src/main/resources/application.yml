@@ -1,17 +1,42 @@
 server:
   port: 8080
+  max-http-request-header-size: 10MB
 
 spring:
   application:
     name: api-gateway
 
+  codec:
+    max-in-memory-size: 10MB
+
+
   cloud:
     gateway:
+      httpclient:
+        max-chunk-size: 10MB
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
       routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/products/**
+            - Path=/products,/products/**,/categories,/categories/**
         - id: cart-service
           uri: lb://cart-service
           predicates:
@@ -24,10 +49,6 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/users/**
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/auth/**
 eureka:
   client:
     register-with-eureka: true

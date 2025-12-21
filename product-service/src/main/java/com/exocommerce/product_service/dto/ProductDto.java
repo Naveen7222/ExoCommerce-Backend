@@ -1,7 +1,6 @@
 package com.exocommerce.product_service.dto;
 
 import lombok.*;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,6 +13,9 @@ public class ProductDto {
     private String description;
     private Double price;
     private Integer stock;
-    private String imageUrl;
-    private String imageData;
+
+    private String imageBase64;
+
+    private Long categoryId;
+    private String categoryName;
 }

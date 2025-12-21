@@ -1,5 +1,6 @@
 package com.exocommerce.product_service.service;
 
+import com.exocommerce.product_service.dto.ProductCartDto;
 import com.exocommerce.product_service.dto.ProductDto;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,4 +14,6 @@ public interface ProductService {
     List<ProductDto> getAllProducts();
     ProductDto updateProduct(Long id, ProductDto dto, MultipartFile image);
     void deleteProduct(Long id);
+    ProductCartDto getCartProductById(Long id);
+
 }

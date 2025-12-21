@@ -1,6 +1,5 @@
 package com.exocommerce.auth_service.service;
 
-import com.exocommerce.auth_service.client.UserClient;
 import com.exocommerce.auth_service.dto.RegisterRequest;
 import com.exocommerce.auth_service.exception.UserNotFoundException;
 import com.exocommerce.auth_service.model.Role;
@@ -11,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -20,42 +17,32 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final UserClient userClient;
 
+    // ========================
+    // REGISTER (AUTH ONLY)
+    // ========================
     @Override
-    public Map<String, Object> register(RegisterRequest request) {
+    public Long register(RegisterRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already registered");
+        }
 
         User authUser = new User();
-        authUser.setName(request.getName());
         authUser.setEmail(request.getEmail());
         authUser.setPassword(passwordEncoder.encode(request.getPassword()));
         authUser.setRole(Role.USER);
-        User savedAuthUser = userRepository.save(authUser);
 
-        Map<String, Object> userRequest = Map.of(
-                "name", request.getName(),
-                "email", request.getEmail(),
-                "phone", request.getPhone(),
-                "address", request.getAddress(),
-                "profileImg", request.getProfileImg(),
-                "authUserId", savedAuthUser.getId()
-        );
-
-
-        // 3. Call User Service using FeignClient
-        Map<String, Object> userProfile =
-                userClient.createUser(userRequest);
-
-        // 4. Return combined response
-        return Map.of(
-                "message", "Registration successful",
-                "authUser", savedAuthUser,
-                "profile", userProfile
-        );
+        User saved = userRepository.save(authUser);
+        return saved.getId(); // Long
     }
 
+    // ========================
+    // LOGIN
+    // ========================
     @Override
     public String login(String email, String password) {
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
@@ -65,9 +52,14 @@ public class AuthServiceImpl implements AuthService {
 
         return jwtUtil.generateToken(user.getEmail(), user.getRole().name());
     }
+
+    // ========================
+    // ADMIN PROMOTION
+    // ========================
     @Override
-    public void promoteUserToAdmin(String name, String email) {
-        User user = userRepository.findByNameAndEmail(name, email)
+    public void promoteUserToAdmin(String email) {
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.setRole(Role.ADMIN);

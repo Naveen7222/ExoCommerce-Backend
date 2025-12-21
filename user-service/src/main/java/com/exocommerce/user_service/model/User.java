@@ -1,9 +1,6 @@
 package com.exocommerce.user_service.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,12 +20,19 @@ public class User {
     private Long id;
 
     private String name;
-    private String email;  // for display only; real email lives in Auth Service
+
+    @Column(nullable = false, unique = true)
+    private String email;  // display email, but must still be unique
+
     private String phone;
     private String address;
-    private String profileImg;
-    private Long authUserId;
 
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] profileImg;
+
+    @Column(nullable = false, unique = true)
+    private Long authUserId;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

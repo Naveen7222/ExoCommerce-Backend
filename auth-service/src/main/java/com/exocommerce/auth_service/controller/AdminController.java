@@ -14,11 +14,20 @@ public class AdminController {
 
     private final AuthService authService;
 
-    @PreAuthorize("hasRole('ADMIN')") // only admin can access
+    // ========================
+    // PROMOTE USER TO ADMIN
+    // ========================
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/promote")
-    public ResponseEntity<String> promoteUser(@RequestBody PromoteRequest request) {
-        authService.promoteUserToAdmin(request.getName(), request.getEmail());
-        return ResponseEntity.ok("User promoted to ADMIN successfully");
-    }
+    public ResponseEntity<String> promoteUser(
+            @RequestBody PromoteRequest request
+    ) {
+        authService.promoteUserToAdmin(
+                request.getEmail()
+        );
 
+        return ResponseEntity.ok(
+                "User promoted to ADMIN successfully"
+        );
+    }
 }

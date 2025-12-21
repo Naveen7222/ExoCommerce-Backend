@@ -21,7 +21,6 @@ public class UserDTO {
 
     private String address;
 
-    private String profileImg;
     private Long authUserId;
 
     private LocalDateTime createdAt;

@@ -5,12 +5,9 @@ import com.exocommerce.auth_service.model.User;
 
 import java.util.Map;
 
-public interface AuthService
-{
-
+public interface AuthService {
+    Long register(RegisterRequest request);
     String login(String email, String password);
-
-    Map<String, Object> register(RegisterRequest request);
-    void promoteUserToAdmin(String name, String email);
+    void promoteUserToAdmin(String email);
 
 }
