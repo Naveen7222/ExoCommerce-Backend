@@ -48,6 +48,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @GetMapping("/by-email")
+    public ResponseEntity<UserDTO> getUserByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(userService.getUserByEmail(email));
+    }
+
+
     // ========================
     // UPDATE USER (NO IMAGE)
     // ========================

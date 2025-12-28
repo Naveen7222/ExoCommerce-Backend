@@ -1,4 +1,4 @@
-package com.exocommmerce.api_gateway;
+package com.exocommerce.api_gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,17 +1,15 @@
 package com.exocommerce.cart_service.service;
 
 import com.exocommerce.cart_service.dto.CartItemResponse;
-import com.exocommerce.cart_service.entity.Cart;
 
 import java.util.List;
 
 public interface CartService {
+    void addToCart(Long userId, Long productId, int quantity);
 
-    Cart addToCart(Long userId, Long productId, int quantity);
+    List<CartItemResponse> getMyCart(Long userId);
 
-    List<CartItemResponse> getCartByUserId(Long userId);
     void removeItem(Long userId, Long productId);
+
     void updateQuantity(Long userId, Long productId, int quantity);
-
-
 }

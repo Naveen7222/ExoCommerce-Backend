@@ -145,10 +145,25 @@ public class ProductServiceImpl implements ProductService {
         return ProductCartDto.builder()
                 .name(product.getName())
                 .price(product.getPrice())
-                .imageBase64(product.getImageData() != null
-                        ? Base64.getEncoder().encodeToString(product.getImageData())
-                        : null)
+                .imageBase64(
+                        product.getImageData() != null
+                                ? Base64.getEncoder().encodeToString(product.getImageData())
+                                : null
+                )
+                .stockQuantity(product.getStock()) // ✅ THIS WAS MISSING
                 .build();
     }
+
+    @Override
+    public List<ProductDto> getProductsByCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        return productRepository.findByCategory(category)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
 
 }

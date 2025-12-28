@@ -1,19 +1,19 @@
 package com.exocommerce.cart_service.service;
 
+import com.exocommerce.cart_service.client.ProductServiceClient;
 import com.exocommerce.cart_service.dto.CartItemResponse;
-import com.exocommerce.cart_service.dto.ProductDto;
+import com.exocommerce.cart_service.dto.ProductCartDto;
 import com.exocommerce.cart_service.entity.Cart;
 import com.exocommerce.cart_service.entity.CartItem;
-import com.exocommerce.cart_service.repository.CartRepository;
+import com.exocommerce.cart_service.exception.CartItemNotFoundException;
+import com.exocommerce.cart_service.exception.CartNotFoundException;
+import com.exocommerce.cart_service.exception.ProductNotAvailableException;
 import com.exocommerce.cart_service.repository.CartItemRepository;
+import com.exocommerce.cart_service.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.exocommerce.cart_service.client.ProductServiceClient;
 
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,92 +23,143 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductServiceClient productServiceClient;
 
-
     @Override
-    public Cart addToCart(Long userId, Long productId, int quantity) {
-        Cart cart = cartRepository.findByUserId(userId).orElseGet(() -> {
-            Cart newCart = Cart.builder()
-                    .userId(userId)
-                    .cartItems(new ArrayList<>())
-                    .build();
-            return cartRepository.save(newCart);
-        });
-
-        // Check if item exists in cart
-        CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId);
-        if (item != null) {
-            item.setQuantity(item.getQuantity() + quantity);
-        } else {
-            item = CartItem.builder()
-                    .cart(cart)
-                    .productId(productId)
-                    .quantity(quantity)
-                    .build();
-            cart.getCartItems().add(item);
+    public void addToCart(Long userId, Long productId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
         }
 
-        return cartRepository.save(cart);
-    }
-    @Override
-    public List<CartItemResponse> getCartByUserId(Long userId) {
+        ProductCartDto product;
+        try {
+            product = productServiceClient.getCartDetailsById(productId);
+        } catch (Exception ex) {
+            throw new ProductNotAvailableException("Unable to fetch product details");
+        }
+
+        Integer stock = product.getStock();
+
+        if (stock == null) {
+            throw new ProductNotAvailableException("Product stock not available");
+        }
+
+        if (stock < quantity) {
+            throw new ProductNotAvailableException("Product is not available in the required quantity");
+        }
+
+
+
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> Cart.builder()
-                        .userId(userId)
-                        .cartItems(new ArrayList<>())
-                        .build());
-        return cart.getCartItems().stream().map(item -> {
-            ProductDto product = productServiceClient.getCartDetailsById(item.getProductId());
+                .orElseGet(() ->
+                        cartRepository.save(
+                                Cart.builder().userId(userId).build()
+                        )
+                );
 
-            CartItemResponse resp = new CartItemResponse();
-            resp.setProductId(item.getProductId());
-            resp.setProductName(product.getName());
-            resp.setImageUrl(product.getImageBase64());
-            resp.setCurrentPrice(product.getPrice());
-            resp.setQuantity(item.getQuantity());
+        CartItem item = cartItemRepository
+                .findByCartIdAndProductId(cart.getId(), productId)
+                .orElseGet(() ->
+                        CartItem.builder()
+                                .cart(cart)
+                                .productId(productId)
+                                .quantity(0)
+                                .build()
+                );
 
-            return resp;
-        }).toList();
+        item.setQuantity(item.getQuantity() + quantity);
+        cartItemRepository.save(item);
     }
+
+    @Override
+    public List<CartItemResponse> getMyCart(Long userId) {
+
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+
+        return cartItemRepository.findByCartId(cart.getId())
+                .stream()
+                .map(item -> {
+
+                    ProductCartDto product;
+                    try {
+                        product = productServiceClient.getCartDetailsById(item.getProductId());
+                    } catch (Exception ex) {
+                        throw new ProductNotAvailableException(
+                                "Unable to fetch product details for productId: " + item.getProductId()
+                        );
+                    }
+
+                    double total = product.getPrice() * item.getQuantity();
+
+                    return CartItemResponse.builder()
+                            .productId(item.getProductId())
+                            .name(product.getName())
+                            .price(product.getPrice())
+                            .imageBase64(product.getImageBase64())
+                            .quantity(item.getQuantity())
+                            .total(total)
+                            .build();
+                })
+                .toList();
+    }
+
+
     @Override
     public void removeItem(Long userId, Long productId) {
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
 
         CartItem item = cartItemRepository
-                .findByCartIdAndProductId(cart.getId(), productId);
+                .findByCartIdAndProductId(cart.getId(), productId)
+                .orElseThrow(() ->
+                        new CartItemNotFoundException("Item not found in cart")
+                );
 
-        if (item == null) {
-            throw new RuntimeException("Item not found in cart");
-        }
-
-        // IMPORTANT: remove from cartItems list
-        cart.getCartItems().remove(item);
-
-        cartRepository.save(cart);
+        cartItemRepository.delete(item);
     }
+
+
     @Override
     public void updateQuantity(Long userId, Long productId, int quantity) {
+        ProductCartDto product;
+        try {
+            product = productServiceClient.getCartDetailsById(productId);
+        } catch (Exception ex) {
+            throw new ProductNotAvailableException("Unable to fetch product details");
+        }
+
+        Integer stock = product.getStock();
+
+        if (stock == null) {
+            throw new ProductNotAvailableException("Product stock not available");
+        }
+
+        if (stock < quantity) {
+            throw new ProductNotAvailableException("Product is not available in the required quantity");
+        }
+
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        CartItem item = cartItemRepository
-                .findByCartIdAndProductId(cart.getId(), productId);
-
-        if (item == null) {
-            throw new RuntimeException("Item not found in cart");
-        }
+                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
 
         if (quantity <= 0) {
-            // remove item if quantity becomes zero
-            cart.getCartItems().remove(item);
-        } else {
-            item.setQuantity(quantity);
+
+            CartItem item = cartItemRepository
+                    .findByCartIdAndProductId(cart.getId(), productId)
+                    .orElseThrow(() ->
+                            new CartItemNotFoundException("Item not found in cart")
+                    );
+
+            cartItemRepository.delete(item);
+            return;
         }
 
-        cartRepository.save(cart);
+
+        CartItem item = cartItemRepository
+                .findByCartIdAndProductId(cart.getId(), productId)
+                .orElseThrow(() -> new CartItemNotFoundException("Item not found"));
+
+        item.setQuantity(quantity);
+        cartItemRepository.save(item);
     }
-
-
 }

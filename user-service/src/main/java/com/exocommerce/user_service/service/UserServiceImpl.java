@@ -79,6 +79,13 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return mapToDTO(user);
     }
+    @Override
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return mapToDTO(user);
+    }
+
 
     // ========================
     // UPDATE USER (NO IMAGE)
