@@ -1,87 +1,35 @@
 package com.exocommerce.order_service.entity;
 
+import com.exocommerce.order_service.enums.OrderStatus;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long userId;
-    @ElementCollection
-    private List<Long> productIds;
-    private Double totalPrice;
-    private String status;
+
+    @Column(nullable = false)
+    private Double totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }
-
-
-//========================= without Lombok just to keep how much diffrence
-//package com.exocommerce.order_service.entity;
-//
-//import jakarta.persistence.*;
-//
-//@Entity
-//@Table(name = "orders")
-//public class Order {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//
-//    private Long userId;
-//    private Double totalPrice;
-//    private String status;
-//
-//    public Order() {}
-//
-//    public Order(Long id, Long userId, Double totalPrice, String status) {
-//        this.id = id;
-//        this.userId = userId;
-//        this.totalPrice = totalPrice;
-//        this.status = status;
-//    }
-//
-//    // Getters and setters
-//    public Long getId() {
-//        return id;
-//    }
-//
-//    public void setId(Long id) {
-//        this.id = id;
-//    }
-//
-//    public Long getUserId() {
-//        return userId;
-//    }
-//
-//    public void setUserId(Long userId) {
-//        this.userId = userId;
-//    }
-//
-//    public Double getTotalPrice() {
-//        return totalPrice;
-//    }
-//
-//    public void setTotalPrice(Double totalPrice) {
-//        this.totalPrice = totalPrice;
-//    }
-//
-//    public String getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(String status) {
-//        this.status = status;
-//    }
-//}

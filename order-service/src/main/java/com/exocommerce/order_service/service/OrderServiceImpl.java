@@ -1,58 +1,71 @@
-package com.exocommerce.order_service.service;
+package com.exocommerce.order_service.service.impl;
 
+import com.exocommerce.order_service.client.CartClient;
+import com.exocommerce.order_service.dto.CartItemDto;
+import com.exocommerce.order_service.dto.CartResponse;
 import com.exocommerce.order_service.entity.Order;
-import com.exocommerce.order_service.entity.ProductResponse;
+import com.exocommerce.order_service.entity.OrderItem;
+import com.exocommerce.order_service.enums.OrderStatus;
+import com.exocommerce.order_service.repository.OrderItemRepository;
 import com.exocommerce.order_service.repository.OrderRepository;
-import com.exocommerce.order_service.service.client.ProductClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.exocommerce.order_service.service.OrderService;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
-    private ProductClient productClient;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final CartClient cartClient;
 
     @Override
-    public Order createOrder(Order order) {
+    @Transactional
+    public Order placeOrder(Long userId) {
 
-        double total = 0.0;
+        CartResponse cartResponse = cartClient.getCart();
 
-        for (Long productId : order.getProductIds()) {
-            var product = productClient.getProductById(productId);
-            total += product.getPrice();
+        if (cartResponse == null
+                || cartResponse.getItems() == null
+                || cartResponse.getItems().isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
         }
 
-        order.setTotalPrice(total);
-        order.setStatus("NEW");
+        Order order = Order.builder()
+                .userId(userId)
+                .status(OrderStatus.PLACED)
+                .totalAmount(0.0)
+                .build();
 
-        return orderRepository.save(order);
-    }
-//    @Override
-//    public Order createOrder(Order order) {
-//        return orderRepository.save(order);
-//    }
+        order = orderRepository.save(order);
 
-    @Override
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
-    }
+        double totalAmount = 0.0;
 
-    @Override
-    public Order getOrderById(Long id) {
-        return orderRepository.findById(id).orElse(null);
-    }
+        for (CartItemDto item : cartResponse.getItems()) {
 
-    @Override
-    public void deleteOrder(Long id) {
-        orderRepository.deleteById(id);
-    }
+            double subtotal = item.getPrice() * item.getQuantity();
 
-    @Override
-    public List<Order> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserId(userId);
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .productId(item.getProductId())
+                    .productName(item.getProductName())
+                    .price(item.getPrice())
+                    .quantity(item.getQuantity())
+                    .subtotal(subtotal)
+                    .build();
+
+            orderItemRepository.save(orderItem);
+            totalAmount += subtotal;
+        }
+
+        order.setTotalAmount(totalAmount);
+        Order savedOrder = orderRepository.save(order);
+
+        // ✅ Clear cart AFTER successful order creation
+        cartClient.clearCart();
+
+        return savedOrder;
     }
 }

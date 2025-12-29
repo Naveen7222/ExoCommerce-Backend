@@ -1,49 +1,36 @@
 package com.exocommerce.order_service.controller;
 
+import com.exocommerce.order_service.dto.OrderResponseDto;
 import com.exocommerce.order_service.entity.Order;
 import com.exocommerce.order_service.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    // Create a new order
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
-    }
+    public ResponseEntity<OrderResponseDto> placeOrder(
+            @AuthenticationPrincipal Jwt jwt) {
 
+        Long userId = jwt.getClaim("userId");
 
-    // Get all orders
-    @GetMapping
-    public List<Order> getAllOrders() {
-        return orderService.getAllOrders();
-    }
+        Order order = orderService.placeOrder(userId);
 
-    // Get order by ID
-    @GetMapping("/{id}")
-    public Order getOrderById(@PathVariable Long id) {
-        return orderService.getOrderById(id);
-    }
+        OrderResponseDto response = OrderResponseDto.builder()
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
 
-    // Delete order
-    @DeleteMapping("/{id}")
-    public String deleteOrder(@PathVariable Long id) {
-        orderService.deleteOrder(id);
-        return "Order deleted successfully!";
+        return ResponseEntity.ok(response);
     }
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getOrdersByUser(@PathVariable Long userId) {
-        List<Order> orders = orderService.getOrdersByUserId(userId);
-        return ResponseEntity.ok(orders);
-    }
-
 }
