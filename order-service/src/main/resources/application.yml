@@ -5,9 +5,15 @@ spring:
   application:
     name: order-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: EXO_SECRET_KEY_123_EXO_SECRET_KEY_123
+
   datasource:
     url: jdbc:mysql://localhost:3306/orders_db
-    username: root
+    username: exo_user
     password: root123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
