@@ -1,17 +1,17 @@
-package com.exocommerce.order_service.service.impl;
+package com.exocommerce.order_service.service;
 
 import com.exocommerce.order_service.client.CartClient;
 import com.exocommerce.order_service.dto.CartItemDto;
-import com.exocommerce.order_service.dto.CartResponse;
 import com.exocommerce.order_service.entity.Order;
 import com.exocommerce.order_service.entity.OrderItem;
 import com.exocommerce.order_service.enums.OrderStatus;
 import com.exocommerce.order_service.repository.OrderItemRepository;
 import com.exocommerce.order_service.repository.OrderRepository;
-import com.exocommerce.order_service.service.OrderService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +25,14 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order placeOrder(Long userId) {
 
-        CartResponse cartResponse = cartClient.getCart();
+        // 1️⃣ Fetch cart items (FIXED)
+        List<CartItemDto> cartItems = cartClient.getCartItems();
 
-        if (cartResponse == null
-                || cartResponse.getItems() == null
-                || cartResponse.getItems().isEmpty()) {
+        if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalStateException("Cart is empty");
         }
 
+        // 2️⃣ Create order
         Order order = Order.builder()
                 .userId(userId)
                 .status(OrderStatus.PLACED)
@@ -41,9 +41,10 @@ public class OrderServiceImpl implements OrderService {
 
         order = orderRepository.save(order);
 
+        // 3️⃣ Create order items
         double totalAmount = 0.0;
 
-        for (CartItemDto item : cartResponse.getItems()) {
+        for (CartItemDto item : cartItems) {
 
             double subtotal = item.getPrice() * item.getQuantity();
 
@@ -60,12 +61,20 @@ public class OrderServiceImpl implements OrderService {
             totalAmount += subtotal;
         }
 
+        // 4️⃣ Update order total
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
 
-        // ✅ Clear cart AFTER successful order creation
-        cartClient.clearCart();
+        // 5️⃣ Clear cart item-by-item (correct API usage)
+        for (CartItemDto item : cartItems) {
+            cartClient.removeItem(item.getProductId());
+        }
 
         return savedOrder;
+    }
+
+    @Override
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
     }
 }
