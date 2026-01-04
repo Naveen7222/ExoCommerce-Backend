@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .productId(item.getProductId())
-                    .productName(item.getProductName())
+                    .productName(item.getName())
                     .price(item.getPrice())
                     .quantity(item.getQuantity())
                     .subtotal(subtotal)

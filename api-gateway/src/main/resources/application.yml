@@ -44,7 +44,10 @@ spring:
           uri: lb://cart-service
           predicates:
             - Path=/carts/**
-
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders,/orders/**
         - id: order-service
           uri: lb://order-service
           predicates:
@@ -62,6 +65,5 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
-# ✅ THIS WAS MISSING
 jwt:
   secret: EXO_SECRET_KEY_123_EXO_SECRET_KEY_123

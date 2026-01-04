@@ -36,27 +36,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO createUserOptionalImage(UserDTO dto, MultipartFile image) {
 
         User user = mapToEntity(dto);
-
-        if (image != null && !image.isEmpty()) {
-
-            // ✅ Image type validation
-            if (image.getContentType() == null ||
-                    !image.getContentType().startsWith("image/")) {
-                throw new RuntimeException("Only image files are allowed");
-            }
-
-            // ✅ Image size limit (2 MB)
-            long maxSize = 2 * 1024 * 1024; // 2MB
-            if (image.getSize() > maxSize) {
-                throw new RuntimeException("Image size must be less than 2MB");
-            }
-
-            try {
-                user.setProfileImg(image.getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read image", e);
-            }
-        }
+        validateAndSetImage(user, image);
 
         User saved = userRepository.save(user);
         return mapToDTO(saved);
@@ -79,6 +59,20 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return mapToDTO(user);
     }
+
+    @Override
+    public byte[] getProfileImage(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getProfileImg() == null) {
+            throw new RuntimeException("Profile image not found");
+        }
+
+        return user.getProfileImg();
+    }
+
     @Override
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
@@ -86,19 +80,21 @@ public class UserServiceImpl implements UserService {
         return mapToDTO(user);
     }
 
-
     // ========================
-    // UPDATE USER (NO IMAGE)
+    // UPDATE USER (DATA + OPTIONAL IMAGE)
     // ========================
     @Override
-    public UserDTO updateUser(Long id, UserDTO userDTO) {
+    @Transactional
+    public UserDTO updateUserWithOptionalImage(Long id, UserDTO userDTO, MultipartFile image) {
+
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         existing.setName(userDTO.getName());
-        existing.setEmail(userDTO.getEmail());
         existing.setPhone(userDTO.getPhone());
         existing.setAddress(userDTO.getAddress());
+
+        validateAndSetImage(existing, image);
 
         User updated = userRepository.save(existing);
         return mapToDTO(updated);
@@ -108,29 +104,13 @@ public class UserServiceImpl implements UserService {
     // UPDATE IMAGE ONLY
     // ========================
     @Override
+    @Transactional
     public void updateProfileImage(Long userId, MultipartFile image) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (image != null && !image.isEmpty()) {
-
-            if (image.getContentType() == null ||
-                    !image.getContentType().startsWith("image/")) {
-                throw new RuntimeException("Only image files are allowed");
-            }
-
-            long maxSize = 2 * 1024 * 1024; // 2MB
-            if (image.getSize() > maxSize) {
-                throw new RuntimeException("Image size must be less than 2MB");
-            }
-
-            try {
-                user.setProfileImg(image.getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read image", e);
-            }
-        }
-
+        validateAndSetImage(user, image);
         userRepository.save(user);
     }
 
@@ -146,9 +126,38 @@ public class UserServiceImpl implements UserService {
     }
 
     // ========================
+    // IMAGE VALIDATION (SINGLE SOURCE)
+    // ========================
+    private void validateAndSetImage(User user, MultipartFile image) {
+
+        if (image == null || image.isEmpty()) return;
+
+        if (image.getContentType() == null ||
+                !image.getContentType().startsWith("image/")) {
+            throw new RuntimeException("Only image files are allowed");
+        }
+
+        if (image.getSize() > 2 * 1024 * 1024) {
+            throw new RuntimeException("Image size must be less than 2MB");
+        }
+
+        try {
+            user.setProfileImg(image.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read image", e);
+        }
+    }
+
+    // ========================
     // MAPPING METHODS
     // ========================
     private UserDTO mapToDTO(User user) {
+
+        boolean hasProfileImage = user.getProfileImg() != null;
+        String profileImageUrl = hasProfileImage
+                ? "/users/" + user.getId() + "/profile-image"
+                : null;
+
         return new UserDTO(
                 user.getId(),
                 user.getName(),
@@ -156,6 +165,8 @@ public class UserServiceImpl implements UserService {
                 user.getPhone(),
                 user.getAddress(),
                 user.getAuthUserId(),
+                hasProfileImage,
+                profileImageUrl,
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );

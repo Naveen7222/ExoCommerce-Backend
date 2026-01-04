@@ -2,10 +2,12 @@ package com.exocommerce.user_service.controller;
 
 import com.exocommerce.user_service.dto.UserDTO;
 import com.exocommerce.user_service.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     // ========================
     // CREATE USER (PROFILE + OPTIONAL IMAGE)
@@ -26,14 +29,12 @@ public class UserController {
             @RequestPart(value = "image", required = false) MultipartFile image
     ) throws Exception {
 
-        ObjectMapper mapper = new ObjectMapper();
-        UserDTO userDTO = mapper.readValue(userJson, UserDTO.class);
+        UserDTO userDTO = objectMapper.readValue(userJson, UserDTO.class);
 
         return ResponseEntity.ok(
                 userService.createUserOptionalImage(userDTO, image)
         );
     }
-
 
     // ========================
     // READ USERS
@@ -53,16 +54,46 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
+    // ========================
+    // GET PROFILE IMAGE
+    // ========================
+    @GetMapping("/{id}/profile-image")
+    public ResponseEntity<byte[]> getProfileImage(@PathVariable Long id) {
+
+        byte[] image = userService.getProfileImage(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
+                .body(image);
+    }
 
     // ========================
-    // UPDATE USER (NO IMAGE)
+    // UPDATE USER (DATA + OPTIONAL IMAGE)
     // ========================
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<UserDTO> updateUserWithOptionalImage(
             @PathVariable Long id,
-            @RequestBody UserDTO userDTO
+            @RequestPart("user") String userJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws Exception {
+
+        UserDTO userDTO = objectMapper.readValue(userJson, UserDTO.class);
+
+        return ResponseEntity.ok(
+                userService.updateUserWithOptionalImage(id, userDTO, image)
+        );
+    }
+
+    // ========================
+    // UPDATE PROFILE IMAGE ONLY
+    // ========================
+    @PutMapping(value = "/{id}/profile-image", consumes = "multipart/form-data")
+    public ResponseEntity<String> updateProfileImage(
+            @PathVariable Long id,
+            @RequestPart("image") MultipartFile image
     ) {
-        return ResponseEntity.ok(userService.updateUser(id, userDTO));
+        userService.updateProfileImage(id, image);
+        return ResponseEntity.ok("Profile image updated successfully");
     }
 
     // ========================

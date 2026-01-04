@@ -24,17 +24,22 @@ public interface UserService {
     List<UserDTO> getAllUsers();
 
     UserDTO getUserById(Long id);
+    byte[] getProfileImage(Long userId);
+
 
     UserDTO getUserByEmail(String email);
 
     // ========================
-    // UPDATE
-    // ========================
+// UPDATE
+// ========================
 
-    UserDTO updateUser(Long id, UserDTO userDTO);
+    // Main update method (data + optional image)
+    UserDTO updateUserWithOptionalImage(Long id, UserDTO userDTO, MultipartFile image);
 
     // Update profile image only
     void updateProfileImage(Long userId, MultipartFile image);
+
+
 
     // ========================
     // DELETE

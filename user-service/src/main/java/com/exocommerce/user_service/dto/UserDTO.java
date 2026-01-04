@@ -12,18 +12,17 @@ import java.time.LocalDateTime;
 public class UserDTO {
 
     private Long id;
-
     private String name;
-
-    private String email; // stored only for display; real email lives in Auth Service
-
+    private String email; // display only
     private String phone;
-
     private String address;
 
     private Long authUserId;
 
-    private LocalDateTime createdAt;
+    // ✅ NEW (profile image info)
+    private boolean hasProfileImage;
+    private String profileImageUrl;
 
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

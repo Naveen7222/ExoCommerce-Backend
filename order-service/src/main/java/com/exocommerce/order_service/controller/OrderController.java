@@ -25,7 +25,9 @@ public class OrderController {
             @AuthenticationPrincipal Jwt jwt) {
 
         Long userId = jwt.getClaim("id");
-
+        if (userId == null) {
+            throw new IllegalStateException("JWT does not contain user id");
+        }
         Order order = orderService.placeOrder(userId);
 
         OrderResponseDto response = OrderResponseDto.builder()
