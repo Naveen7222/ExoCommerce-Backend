@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // ========================
-    // ADMIN PROMOTION
+    // ADMIN PROMOTION  and Demote
     // ========================
     @Override
     public void promoteUserToAdmin(String email) {
@@ -63,6 +63,18 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.setRole(Role.ADMIN);
+        userRepository.save(user);
+    }
+    @Override
+    public void demoteAdminToUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() != Role.ADMIN) {
+            throw new IllegalStateException("User is not an ADMIN");
+        }
+
+        user.setRole(Role.USER);
         userRepository.save(user);
     }
 

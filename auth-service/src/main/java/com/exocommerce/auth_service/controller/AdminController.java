@@ -30,4 +30,19 @@ public class AdminController {
                 "User promoted to ADMIN successfully"
         );
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/demote")
+    public ResponseEntity<String> demoteUser(
+            @RequestBody PromoteRequest request
+    ) {
+        authService.demoteAdminToUser(
+                request.getEmail()
+        );
+
+        return ResponseEntity.ok(
+                "Admin demoted to USER successfully"
+        );
+    }
+
 }

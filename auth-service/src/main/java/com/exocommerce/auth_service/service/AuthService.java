@@ -9,5 +9,6 @@ public interface AuthService {
     Long register(RegisterRequest request);
     String login(String email, String password);
     void promoteUserToAdmin(String email);
+    void demoteAdminToUser(String email);
 
 }
