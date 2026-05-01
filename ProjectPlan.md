@@ -6,8 +6,6 @@
 - Communication: REST APIs (JSON)
 - API Gateway: Spring Cloud Gateway
 - Service Discovery: Netflix Eureka Server
-- Inter-service Communication: OpenFeign
-- Load Balancing: Spring Cloud LoadBalancer
 - Database per Service: MySQL (isolated per microservice)
 
 ---
@@ -19,30 +17,23 @@
 - Framework: Spring Boot 3.2.0
 - Build Tool: Maven 3.9.x
 - Spring Cloud: 2023.0.x
-- Dependencies:
-    - spring-boot-starter-web (3.2.0)
-    - spring-boot-starter-data-jpa (3.2.0)
-    - spring-boot-starter-security (3.2.0)
-    - spring-boot-starter-validation (3.2.0)
-    - spring-boot-starter-actuator (3.2.0)
-    - spring-cloud-starter-gateway
-    - spring-cloud-starter-netflix-eureka-server
-    - spring-cloud-starter-netflix-eureka-client
-    - spring-cloud-starter-openfeign
-    - spring-cloud-starter-loadbalancer
-    - jjwt-api (0.11.5)
-    - jjwt-impl (0.11.5)
-    - jjwt-jackson (0.11.5)
-    - mysql-connector-j (runtime)
-    - lombok (optional)
-    - spring-boot-starter-test (test)
+
+### Core Dependencies:
+- spring-boot-starter-web
+- spring-boot-starter-data-jpa
+- spring-boot-starter-security
+- spring-cloud-starter-gateway
+- spring-cloud-starter-netflix-eureka-server
+- spring-cloud-starter-netflix-eureka-client
+- jjwt (JWT handling)
+- mysql-connector-j
+- lombok
 
 ---
 
 ### Frontend
 - Framework: React 19.2.0
 - Router: React Router DOM 7.9.5
-- State Management: Redux Toolkit 2.10.1
 - Styling: Tailwind CSS 4.1.17
 - HTTP Client: Axios 1.13.2
 - Authentication Handling: JWT (jwt-decode 4.0.0)
@@ -52,14 +43,15 @@
 **Frontend Overview:**
 - JWT-based authentication flow
 - Protected routes using React Router
-- Global state handled via Redux Toolkit
-- API communication through Axios
+- Global cart state managed using Context API
+- Authentication state handled using localStorage
+- API communication through Axios with interceptors
 - Responsive UI using Tailwind CSS
 
 ---
 
 ## 🧩 Backend Services
-- Eureka Service (Service Discovery)
+- Eureka Server (Service Discovery)
 - API Gateway
 - Auth Service
 - User Service
