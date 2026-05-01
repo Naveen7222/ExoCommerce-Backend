@@ -52,10 +52,6 @@ spring:
           predicates:
             - Path=/orders,/orders/**
         - id: order-service
-          uri: lb://order-service
-          predicates:
-            - Path=/orders/**
-
         - id: user-service
           uri: lb://user-service
           predicates:
@@ -66,7 +62,8 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+#      defaultZone: http://localhost:8761/eureka/
+       defaultZone: https://exocommerce-backend.onrender.com
 
 jwt:
   secret: EXO_SECRET_KEY_123_EXO_SECRET_KEY_123
