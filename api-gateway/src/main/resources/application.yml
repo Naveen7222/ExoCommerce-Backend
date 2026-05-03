@@ -68,4 +68,4 @@ eureka:
       defaultZone: https://exocommerce-backend.onrender.com/eureka/
 
 jwt:
-  secret: EXO_SECRET_KEY_123_EXO_SECRET_KEY_123
+  secret: ${JWT_SECRET}
