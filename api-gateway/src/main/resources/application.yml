@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   max-http-request-header-size: 10MB
 
 spring:
@@ -34,24 +34,27 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/auth/**
+
         - id: admin-auth-service
           uri: lb://auth-service
           predicates:
             - Path=/admin/**
+
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/products,/products/**,/categories,/categories/**
+            - Path=/products/**,/categories/**
 
         - id: cart-service
           uri: lb://cart-service
           predicates:
             - Path=/carts/**
+
         - id: order-service
           uri: lb://order-service
           predicates:
-            - Path=/orders,/orders/**
-        - id: order-service
+            - Path=/orders/**
+
         - id: user-service
           uri: lb://user-service
           predicates:
@@ -62,8 +65,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-#      defaultZone: http://localhost:8761/eureka/
-       defaultZone: https://exocommerce-backend.onrender.com
+      defaultZone: https://exocommerce-backend.onrender.com/eureka/
 
 jwt:
   secret: EXO_SECRET_KEY_123_EXO_SECRET_KEY_123

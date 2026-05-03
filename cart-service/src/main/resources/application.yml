@@ -5,6 +5,20 @@ spring:
   application:
     name: cart-service
 
+  datasource:
+    url: jdbc:mysql://localhost:3306/carts_db
+    username: exo_user
+    password: root123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
 eureka:
   client:
     register-with-eureka: true
