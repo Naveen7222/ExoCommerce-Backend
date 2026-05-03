@@ -1,9 +1,11 @@
-FROM eclipse-temurin:17-jdk
+FROM maven:3.9.9-eclipse-temurin-17
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY . .
 
-EXPOSE 8761
+RUN mvn clean package -DskipTests
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+EXPOSE 8081
+
+ENTRYPOINT ["java", "-jar", "target/auth-service-1.0.0.jar"]
