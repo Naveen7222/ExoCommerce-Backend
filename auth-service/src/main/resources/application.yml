@@ -28,14 +28,7 @@ eureka:
       defaultZone: https://exocommerce-backend.onrender.com/eureka
 
   instance:
-    hostname: auth-service-ueyq.onrender.com
-    secure-port: 443
-    secure-port-enabled: true
-    non-secure-port-enabled: false
-    status-page-url: https://auth-service-ueyq.onrender.com/actuator/info
-    health-check-url: https://auth-service-ueyq.onrender.com/actuator/health
-    home-page-url: https://auth-service-ueyq.onrender.com
-    secure-virtual-host-name: auth-service
+    prefer-ip-address: true
 
 jwt:
   secret: ${JWT_SECRET}
