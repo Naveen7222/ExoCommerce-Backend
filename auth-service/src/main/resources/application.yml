@@ -28,8 +28,14 @@ eureka:
       defaultZone: https://exocommerce-backend.onrender.com/eureka
 
   instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.value}
+    hostname: auth-service-ueyq.onrender.com
+    secure-port: 443
+    secure-port-enabled: true
+    non-secure-port-enabled: false
+    status-page-url: https://auth-service-ueyq.onrender.com/actuator/info
+    health-check-url: https://auth-service-ueyq.onrender.com/actuator/health
+    home-page-url: https://auth-service-ueyq.onrender.com
+    secure-virtual-host-name: auth-service
 
 jwt:
   secret: ${JWT_SECRET}

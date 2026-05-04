@@ -17,8 +17,8 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins:
-              - "http://localhost:5173"
+            allowedOriginPatterns:
+              - "https://*.vercel.app"
             allowedMethods:
               - GET
               - POST
@@ -31,12 +31,12 @@ spring:
 
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: https://auth-service-ueyq.onrender.com
           predicates:
             - Path=/auth/**
 
         - id: admin-auth-service
-          uri: lb://auth-service
+          uri: https://auth-service-ueyq.onrender.com
           predicates:
             - Path=/admin/**
 
