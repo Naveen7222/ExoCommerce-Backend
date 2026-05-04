@@ -25,7 +25,11 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: https://exocommerce-backend.onrender.com/eureka/
+      defaultZone: https://exocommerce-backend.onrender.com/eureka
+
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
 
 jwt:
   secret: ${JWT_SECRET}
