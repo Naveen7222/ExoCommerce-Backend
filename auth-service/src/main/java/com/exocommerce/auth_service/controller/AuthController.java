@@ -45,4 +45,9 @@ public class AuthController {
                 Map.of("token", token)
         );
     }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "AUTH WORKING";
+    }
 }
