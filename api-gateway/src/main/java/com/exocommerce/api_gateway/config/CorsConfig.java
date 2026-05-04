@@ -15,14 +15,22 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("*"));
+        // ✅ Allow all Vercel domains (preview + production)
+        config.setAllowedOriginPatterns(List.of("https://*.vercel.app"));
 
+        // ✅ Allowed HTTP methods
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"
         ));
 
+        // ✅ Allow all headers (Authorization, Content-Type, etc.)
         config.setAllowedHeaders(List.of("*"));
+
+        // ✅ Required if you're sending JWT / Authorization headers
         config.setAllowCredentials(true);
+
+        // Optional but recommended
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
