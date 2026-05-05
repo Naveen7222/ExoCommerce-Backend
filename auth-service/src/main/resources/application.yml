@@ -15,17 +15,14 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
     hibernate:
-      ddl-auto: update
-
-  main:
-    allow-bean-definition-overriding: true
+      ddl-auto: update   # change to 'validate' in production
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: https://exocommerce-backend.onrender.com/eureka
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
 
   instance:
     prefer-ip-address: true

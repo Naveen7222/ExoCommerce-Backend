@@ -1,14 +1,14 @@
 server:
-  port: 8084
+  port: ${PORT}
 
 spring:
   application:
     name: cart-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/carts_db
-    username: exo_user
-    password: root123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -24,4 +24,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_DEFAULT_ZONE}

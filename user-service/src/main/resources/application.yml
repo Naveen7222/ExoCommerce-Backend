@@ -1,19 +1,19 @@
 server:
-  port: 8082
+  port: ${PORT:8082}
 
 spring:
   application:
     name: user-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/users_service_db
-    username: exo_user
-    password: root123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update   # change to 'validate' in production
     show-sql: true
     properties:
       hibernate:
@@ -30,4 +30,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
