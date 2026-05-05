@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY target/*.jar app.jar
 
-EXPOSE 8761
+# optional (just documentation)
+EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xms64m", "-Xmx128m", "-jar", "app.jar"]
