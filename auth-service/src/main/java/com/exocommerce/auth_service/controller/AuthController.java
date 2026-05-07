@@ -55,4 +55,9 @@ public class AuthController {
     public String ping() {
         return "AUTH WORKING";
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Auth Service Running");
+    }
 }

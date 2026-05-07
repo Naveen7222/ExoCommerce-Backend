@@ -101,4 +101,9 @@ public class ProductController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Product Service Running");
+    }
+
 }
