@@ -31,3 +31,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_DEFAULT_ZONE}
+
+  instance:
+    prefer-ip-address: true
