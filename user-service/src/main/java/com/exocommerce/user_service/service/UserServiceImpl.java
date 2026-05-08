@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserById(Long id) {
-        User user = userRepository.findById(id)
+        User user = userRepository.findByAuthUserId(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return mapToDTO(user);
     }
