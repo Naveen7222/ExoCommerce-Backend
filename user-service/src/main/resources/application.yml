@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # change to 'validate' in production
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -31,3 +31,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_DEFAULT_ZONE}
+
+  instance:
+    prefer-ip-address: true

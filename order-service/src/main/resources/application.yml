@@ -1,5 +1,5 @@
 server:
-  port: ${PORT}
+  port: ${PORT:8084}
 
 spring:
   application:
@@ -31,3 +31,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_DEFAULT_ZONE}
+
+  instance:
+    prefer-ip-address: true

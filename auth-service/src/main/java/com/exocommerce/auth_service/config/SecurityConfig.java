@@ -28,7 +28,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                         "/auth/register",
-                        "/auth/login"
+                        "/auth/login",
+                        "/auth/health"
                 ).permitAll()
                 .anyRequest().authenticated()
         );

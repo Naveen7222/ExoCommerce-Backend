@@ -1,9 +1,21 @@
-FROM eclipse-temurin:17-jdk
+# Stage 1: Build
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+# Copy only current service (because root dir = order-service)
+COPY . .
 
-EXPOSE 8761
+RUN mvn clean package -DskipTests
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Stage 2: Run
+FROM eclipse-temurin:17-jdk-jammy
+
+WORKDIR /app
+
+# Copy built jar (auto-detect)
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
