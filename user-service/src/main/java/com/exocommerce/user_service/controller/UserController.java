@@ -107,6 +107,6 @@
 
         @GetMapping("/health")
         public ResponseEntity<String> health() {
-            return ResponseEntity.ok("User Service Running");
+            return ResponseEntity.ok("User Service is running");
         }
     }

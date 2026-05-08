@@ -63,6 +63,6 @@ public class OrderController {
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Order Service Running");
+        return ResponseEntity.ok("Order Service is running");
     }
 }

@@ -55,6 +55,6 @@ public class CartController {
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
-        return ResponseEntity.ok("Cart Service Running");
+        return ResponseEntity.ok("Cart Service is running");
     }
 }
