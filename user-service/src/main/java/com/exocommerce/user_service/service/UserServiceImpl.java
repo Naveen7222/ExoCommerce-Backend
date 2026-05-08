@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public byte[] getProfileImage(Long userId) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByAuthUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getProfileImg() == null) {
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO updateUserWithOptionalImage(Long id, UserDTO userDTO, MultipartFile image) {
 
-        User existing = userRepository.findById(id)
+        User existing = userRepository.findByAuthUserId(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         existing.setName(userDTO.getName());
@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateProfileImage(Long userId, MultipartFile image) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByAuthUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         validateAndSetImage(user, image);
