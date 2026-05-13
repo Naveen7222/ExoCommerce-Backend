@@ -1,92 +1,33 @@
 package com.exocommerce.cart_service.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    // =========================
-    // Cart not found
-    // =========================
-    @ExceptionHandler(CartNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCartNotFound(
-            CartNotFoundException ex,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        log.error("ResourceNotFoundException: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(404, "NOT_FOUND", ex.getMessage()));
     }
 
-    // =========================
-    // Cart item not found
-    // =========================
-    @ExceptionHandler(CartItemNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCartItemNotFound(
-            CartItemNotFoundException ex,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
+        log.error("ValidationException: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(400, "VALIDATION_ERROR", ex.getMessage()));
     }
 
-    // =========================
-    // Product not available / stock issues
-    // =========================
-    @ExceptionHandler(ProductNotAvailableException.class)
-    public ResponseEntity<Map<String, Object>> handleProductNotAvailable(
-            ProductNotAvailableException ex,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
-    }
-
-    // =========================
-    // Illegal arguments (e.g. quantity <= 0)
-    // =========================
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(
-            IllegalArgumentException ex,
-            HttpServletRequest request
-    ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
-    }
-
-    // =========================
-    // Fallback (unexpected errors)
-    // =========================
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(
-            Exception ex,
-            HttpServletRequest request
-    ) {
-        return buildResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Something went wrong. Please try again.",
-                request
-        );
-    }
-
-    // =========================
-    // Common response builder
-    // =========================
-    private ResponseEntity<Map<String, Object>> buildResponse(
-            HttpStatus status,
-            String message,
-            HttpServletRequest request
-    ) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        body.put("path", request.getRequestURI());
-
-        return ResponseEntity.status(status).body(body);
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        log.error("Unhandled exception: ", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(500, "INTERNAL_SERVER_ERROR", "Something went wrong"));
     }
 }

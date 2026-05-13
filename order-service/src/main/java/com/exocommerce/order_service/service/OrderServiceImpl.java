@@ -5,6 +5,7 @@ import com.exocommerce.order_service.dto.CartItemDto;
 import com.exocommerce.order_service.entity.Order;
 import com.exocommerce.order_service.entity.OrderItem;
 import com.exocommerce.order_service.enums.OrderStatus;
+import com.exocommerce.order_service.exception.ValidationException;
 import com.exocommerce.order_service.repository.OrderItemRepository;
 import com.exocommerce.order_service.repository.OrderRepository;
 import jakarta.transaction.Transactional;
@@ -29,7 +30,7 @@ public class OrderServiceImpl implements OrderService {
         List<CartItemDto> cartItems = cartClient.getCartItems();
 
         if (cartItems == null || cartItems.isEmpty()) {
-            throw new IllegalStateException("Cart is empty");
+            throw new ValidationException("Cart is empty");
         }
 
         // 2️⃣ Create order

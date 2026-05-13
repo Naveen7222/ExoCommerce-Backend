@@ -1,4 +1,4 @@
-package com.exocommerce.auth_service.exception;
+package com.exocommerce.user_service.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,20 +15,6 @@ public class GlobalExceptionHandler {
         log.error("ResourceNotFoundException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(404, "NOT_FOUND", ex.getMessage()));
-    }
-
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateException ex) {
-        log.error("DuplicateException: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(409, "DUPLICATE", ex.getMessage()));
-    }
-
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
-        log.error("UnauthorizedException: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse(401, "UNAUTHORIZED", ex.getMessage()));
     }
 
     @ExceptionHandler(ValidationException.class)

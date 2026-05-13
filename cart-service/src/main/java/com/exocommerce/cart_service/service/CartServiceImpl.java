@@ -5,9 +5,8 @@ import com.exocommerce.cart_service.dto.CartItemResponse;
 import com.exocommerce.cart_service.dto.ProductCartDto;
 import com.exocommerce.cart_service.entity.Cart;
 import com.exocommerce.cart_service.entity.CartItem;
-import com.exocommerce.cart_service.exception.CartItemNotFoundException;
-import com.exocommerce.cart_service.exception.CartNotFoundException;
-import com.exocommerce.cart_service.exception.ProductNotAvailableException;
+import com.exocommerce.cart_service.exception.ResourceNotFoundException;
+import com.exocommerce.cart_service.exception.ValidationException;
 import com.exocommerce.cart_service.repository.CartItemRepository;
 import com.exocommerce.cart_service.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,24 +25,24 @@ public class CartServiceImpl implements CartService {
     @Override
     public void addToCart(Long userId, Long productId, int quantity) {
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
+            throw new ValidationException("Quantity must be greater than zero");
         }
 
         ProductCartDto product;
         try {
             product = productServiceClient.getCartDetailsById(productId);
         } catch (Exception ex) {
-            throw new ProductNotAvailableException("Unable to fetch product details");
+            throw new ValidationException("Unable to fetch product details");
         }
 
         Integer stock = product.getStock();
 
         if (stock == null) {
-            throw new ProductNotAvailableException("Product stock not available");
+            throw new ValidationException("Product stock not available");
         }
 
         if (stock < quantity) {
-            throw new ProductNotAvailableException("Product is not available in the required quantity");
+            throw new ValidationException("Product is not available in the required quantity");
         }
 
 
@@ -73,7 +72,7 @@ public class CartServiceImpl implements CartService {
     public List<CartItemResponse> getMyCart(Long userId) {
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         return cartItemRepository.findByCartId(cart.getId())
                 .stream()
@@ -83,7 +82,7 @@ public class CartServiceImpl implements CartService {
                     try {
                         product = productServiceClient.getCartDetailsById(item.getProductId());
                     } catch (Exception ex) {
-                        throw new ProductNotAvailableException(
+                        throw new ValidationException(
                                 "Unable to fetch product details for productId: " + item.getProductId()
                         );
                     }
@@ -107,12 +106,12 @@ public class CartServiceImpl implements CartService {
     public void removeItem(Long userId, Long productId) {
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         CartItem item = cartItemRepository
                 .findByCartIdAndProductId(cart.getId(), productId)
                 .orElseThrow(() ->
-                        new CartItemNotFoundException("Item not found in cart")
+                        new ResourceNotFoundException("Item not found in cart")
                 );
 
         cartItemRepository.delete(item);
@@ -125,29 +124,29 @@ public class CartServiceImpl implements CartService {
         try {
             product = productServiceClient.getCartDetailsById(productId);
         } catch (Exception ex) {
-            throw new ProductNotAvailableException("Unable to fetch product details");
+            throw new ValidationException("Unable to fetch product details");
         }
 
         Integer stock = product.getStock();
 
         if (stock == null) {
-            throw new ProductNotAvailableException("Product stock not available");
+            throw new ValidationException("Product stock not available");
         }
 
         if (stock < quantity) {
-            throw new ProductNotAvailableException("Product is not available in the required quantity");
+            throw new ValidationException("Product is not available in the required quantity");
         }
 
 
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new CartNotFoundException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         if (quantity <= 0) {
 
             CartItem item = cartItemRepository
                     .findByCartIdAndProductId(cart.getId(), productId)
                     .orElseThrow(() ->
-                            new CartItemNotFoundException("Item not found in cart")
+                            new ResourceNotFoundException("Item not found in cart")
                     );
 
             cartItemRepository.delete(item);
@@ -157,7 +156,7 @@ public class CartServiceImpl implements CartService {
 
         CartItem item = cartItemRepository
                 .findByCartIdAndProductId(cart.getId(), productId)
-                .orElseThrow(() -> new CartItemNotFoundException("Item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
 
         item.setQuantity(quantity);
         cartItemRepository.save(item);

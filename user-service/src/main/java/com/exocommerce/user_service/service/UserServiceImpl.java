@@ -1,6 +1,8 @@
 package com.exocommerce.user_service.service;
 
 import com.exocommerce.user_service.dto.UserDTO;
+import com.exocommerce.user_service.exception.ResourceNotFoundException;
+import com.exocommerce.user_service.exception.ValidationException;
 import com.exocommerce.user_service.model.User;
 import com.exocommerce.user_service.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -55,19 +57,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserById(Long id) {
+<<<<<<< Updated upstream
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+=======
+        User user = userRepository.findByAuthUserId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+>>>>>>> Stashed changes
         return mapToDTO(user);
     }
 
     @Override
     public byte[] getProfileImage(Long userId) {
 
+<<<<<<< Updated upstream
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+=======
+        User user = userRepository.findByAuthUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+>>>>>>> Stashed changes
 
         if (user.getProfileImg() == null) {
-            throw new RuntimeException("Profile image not found");
+            throw new ResourceNotFoundException("Profile image not found");
         }
 
         return user.getProfileImg();
@@ -76,7 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         return mapToDTO(user);
     }
 
@@ -87,8 +99,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO updateUserWithOptionalImage(Long id, UserDTO userDTO, MultipartFile image) {
 
+<<<<<<< Updated upstream
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+=======
+        User existing = userRepository.findByAuthUserId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+>>>>>>> Stashed changes
 
         existing.setName(userDTO.getName());
         existing.setPhone(userDTO.getPhone());
@@ -107,8 +124,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateProfileImage(Long userId, MultipartFile image) {
 
+<<<<<<< Updated upstream
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+=======
+        User user = userRepository.findByAuthUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+>>>>>>> Stashed changes
 
         validateAndSetImage(user, image);
         userRepository.save(user);
@@ -120,7 +142,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
         userRepository.deleteById(id);
     }
@@ -134,17 +156,17 @@ public class UserServiceImpl implements UserService {
 
         if (image.getContentType() == null ||
                 !image.getContentType().startsWith("image/")) {
-            throw new RuntimeException("Only image files are allowed");
+            throw new ValidationException("Only image files are allowed");
         }
 
         if (image.getSize() > 2 * 1024 * 1024) {
-            throw new RuntimeException("Image size must be less than 2MB");
+            throw new ValidationException("Image size must be less than 2MB");
         }
 
         try {
             user.setProfileImg(image.getBytes());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read image", e);
+            throw new ValidationException("Failed to read image");
         }
     }
 

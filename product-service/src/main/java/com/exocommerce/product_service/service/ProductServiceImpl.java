@@ -5,6 +5,7 @@ import com.exocommerce.product_service.dto.ProductDto;
 import com.exocommerce.product_service.entity.Category;
 import com.exocommerce.product_service.entity.Product;
 import com.exocommerce.product_service.exception.ResourceNotFoundException;
+import com.exocommerce.product_service.exception.ValidationException;
 import com.exocommerce.product_service.repository.CategoryRepository;
 import com.exocommerce.product_service.repository.ProductRepository;
 import com.exocommerce.product_service.service.ProductService;
@@ -60,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getCategoryId() != null) {
             Category category = categoryRepository.findById(dto.getCategoryId())
                     .orElseThrow(() ->
-                            new RuntimeException("Category not found with id: " + dto.getCategoryId()));
+                            new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
             product.setCategory(category);
         }
 
@@ -77,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
             try {
                 product.setImageData(image.getBytes());
             } catch (Exception e) {
-                throw new RuntimeException("Failed to process image", e);
+                throw new ValidationException("Failed to process image");
             }
         }
 
@@ -114,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getCategoryId() != null) {
             Category category = categoryRepository.findById(dto.getCategoryId())
                     .orElseThrow(() ->
-                            new RuntimeException("Category not found with id: " + dto.getCategoryId()));
+                            new ResourceNotFoundException("Category not found with id: " + dto.getCategoryId()));
             product.setCategory(category);
         }
 
@@ -122,7 +123,7 @@ public class ProductServiceImpl implements ProductService {
             try {
                 product.setImageData(image.getBytes());
             } catch (Exception e) {
-                throw new RuntimeException("Failed to process image", e);
+                throw new ValidationException("Failed to process image");
             }
         }
         // else → keep existing imageData
@@ -157,7 +158,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> getProductsByCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         return productRepository.findByCategory(category)
                 .stream()

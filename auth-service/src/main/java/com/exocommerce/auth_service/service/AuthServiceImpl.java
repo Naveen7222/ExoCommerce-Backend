@@ -1,7 +1,10 @@
 package com.exocommerce.auth_service.service;
 
 import com.exocommerce.auth_service.dto.RegisterRequest;
-import com.exocommerce.auth_service.exception.UserNotFoundException;
+import com.exocommerce.auth_service.exception.DuplicateException;
+import com.exocommerce.auth_service.exception.ResourceNotFoundException;
+import com.exocommerce.auth_service.exception.UnauthorizedException;
+import com.exocommerce.auth_service.exception.ValidationException;
 import com.exocommerce.auth_service.model.Role;
 import com.exocommerce.auth_service.model.User;
 import com.exocommerce.auth_service.repository.UserRepository;
@@ -25,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
     public Long register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new DuplicateException("Email already registered");
         }
 
         User authUser = new User();
@@ -44,10 +47,10 @@ public class AuthServiceImpl implements AuthService {
     public String login(String email, String password) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Invalid credentials");
         }
 
         return jwtUtil.generateToken(user.getId(),user.getEmail(), user.getRole().name());
@@ -60,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
     public void promoteUserToAdmin(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setRole(Role.ADMIN);
         userRepository.save(user);
@@ -68,10 +71,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void demoteAdminToUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (user.getRole() != Role.ADMIN) {
-            throw new IllegalStateException("User is not an ADMIN");
+            throw new ValidationException("User is not an ADMIN");
         }
 
         user.setRole(Role.USER);
