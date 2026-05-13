@@ -1,0 +1,59 @@
+function Get-ExoServices {
+  @('eureka-service','api-gateway','auth-service','user-service','product-service','cart-service','order-service')
+}
+
+function Stop-ExoService([string]$service) {
+  $root = 'C:\ExoCommerce\ExoCommerce-backend'
+  $svcPath = "$root\$service"
+  if (!(Test-Path $svcPath)) { Write-Host "Service not found: $service"; return }
+
+  $escaped = [regex]::Escape($svcPath)
+
+  Get-CimInstance Win32_Process |
+    Where-Object { $_.Name -eq 'java.exe' -and $_.CommandLine -match $escaped } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+
+  Get-CimInstance Win32_Process |
+    Where-Object { ($_.Name -eq 'powershell.exe' -or $_.Name -eq 'cmd.exe') -and $_.CommandLine -match $escaped } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+
+  Start-Sleep -Milliseconds 700
+}
+
+function Start-ExoService([string]$service) {
+  $root = 'C:\ExoCommerce\ExoCommerce-backend'
+  $svcPath = "$root\$service"
+  if (!(Test-Path $svcPath)) { Write-Host "Service not found: $service"; return }
+
+  $logDir = "$svcPath\logs"
+  if (Test-Path $logDir) { Remove-Item $logDir -Recurse -Force -ErrorAction SilentlyContinue }
+  New-Item -ItemType Directory -Path $logDir | Out-Null
+
+  Start-Process powershell -WindowStyle Hidden -ArgumentList "-NoProfile -Command `"cd '$svcPath'; mvn spring-boot:run *>> logs\service.log`""
+  Write-Host "Started: $service"
+}
+
+function Restart-ExoService([string]$service) {
+  Stop-ExoService $service
+  Start-ExoService $service
+}
+
+function start-all {
+  Get-ExoServices | ForEach-Object { Start-ExoService $_ }
+}
+
+function stop-all {
+  Get-ExoServices | ForEach-Object { Stop-ExoService $_ }
+}
+
+function restart-all {
+  Get-ExoServices | ForEach-Object { Restart-ExoService $_ }
+}
+
+function eureka-restart { Restart-ExoService 'eureka-service' }
+function gateway-restart { Restart-ExoService 'api-gateway' }
+function auth-restart { Restart-ExoService 'auth-service' }
+function user-restart { Restart-ExoService 'user-service' }
+function product-restart { Restart-ExoService 'product-service' }
+function cart-restart { Restart-ExoService 'cart-service' }
+function order-restart { Restart-ExoService 'order-service' }

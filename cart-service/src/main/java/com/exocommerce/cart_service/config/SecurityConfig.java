@@ -2,6 +2,7 @@ package com.exocommerce.cart_service.config;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -13,9 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // ⚠️ MUST MATCH auth-service EXACTLY
-    private static final String JWT_SECRET =
-            "EXO_SECRET_KEY_123_EXO_SECRET_KEY_123";
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,7 +37,7 @@ public class SecurityConfig {
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withSecretKey(
                 new SecretKeySpec(
-                        JWT_SECRET.getBytes(),
+                        jwtSecret.getBytes(),
                         "HmacSHA256"
                 )
         ).build();
