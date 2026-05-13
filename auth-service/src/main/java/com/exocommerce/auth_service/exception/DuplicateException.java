@@ -1,4 +1,4 @@
-﻿package com.exocommerce.auth_service.exception;
+package com.exocommerce.auth_service.exception;
 
 public class DuplicateException extends RuntimeException {
     public DuplicateException(String message) {

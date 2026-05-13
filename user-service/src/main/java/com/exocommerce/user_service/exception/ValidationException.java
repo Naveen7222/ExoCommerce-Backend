@@ -1,4 +1,4 @@
-﻿package com.exocommerce.user_service.exception;
+package com.exocommerce.user_service.exception;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

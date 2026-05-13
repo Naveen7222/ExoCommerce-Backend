@@ -57,26 +57,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserById(Long id) {
-<<<<<<< Updated upstream
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-=======
         User user = userRepository.findByAuthUserId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
->>>>>>> Stashed changes
+
         return mapToDTO(user);
     }
 
     @Override
     public byte[] getProfileImage(Long userId) {
 
-<<<<<<< Updated upstream
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-=======
         User user = userRepository.findByAuthUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
->>>>>>> Stashed changes
 
         if (user.getProfileImg() == null) {
             throw new ResourceNotFoundException("Profile image not found");
@@ -89,6 +80,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
         return mapToDTO(user);
     }
 
@@ -99,13 +91,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO updateUserWithOptionalImage(Long id, UserDTO userDTO, MultipartFile image) {
 
-<<<<<<< Updated upstream
-        User existing = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-=======
         User existing = userRepository.findByAuthUserId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
->>>>>>> Stashed changes
 
         existing.setName(userDTO.getName());
         existing.setPhone(userDTO.getPhone());
@@ -124,13 +111,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateProfileImage(Long userId, MultipartFile image) {
 
-<<<<<<< Updated upstream
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-=======
         User user = userRepository.findByAuthUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
->>>>>>> Stashed changes
 
         validateAndSetImage(user, image);
         userRepository.save(user);
@@ -144,6 +126,7 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User not found");
         }
+
         userRepository.deleteById(id);
     }
 
@@ -176,6 +159,7 @@ public class UserServiceImpl implements UserService {
     private UserDTO mapToDTO(User user) {
 
         boolean hasProfileImage = user.getProfileImg() != null;
+
         String profileImageUrl = hasProfileImage
                 ? "/users/" + user.getId() + "/profile-image"
                 : null;
@@ -195,12 +179,15 @@ public class UserServiceImpl implements UserService {
     }
 
     private User mapToEntity(UserDTO dto) {
+
         User user = new User();
+
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
         user.setAddress(dto.getAddress());
         user.setAuthUserId(dto.getAuthUserId());
+
         return user;
     }
 }
