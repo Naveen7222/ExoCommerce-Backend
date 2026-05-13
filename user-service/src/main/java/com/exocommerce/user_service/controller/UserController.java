@@ -104,4 +104,9 @@
             userService.deleteUser(id);
             return ResponseEntity.ok("User deleted successfully");
         }
+
+        @GetMapping("/health")
+        public ResponseEntity<String> health() {
+            return ResponseEntity.ok("User Service is running");
+        }
     }

@@ -36,13 +36,28 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> login(
             @RequestBody LoginRequest request
     ) {
-        String token = authService.login(
-                request.getEmail(),
-                request.getPassword()
-        );
+        try {
+            String token = authService.login(
+                    request.getEmail(),
+                    request.getPassword()
+            );
 
-        return ResponseEntity.ok(
-                Map.of("token", token)
-        );
+            return ResponseEntity.ok(
+                    Map.of("token", token)
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "AUTH WORKING";
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Auth Service Running");
     }
 }

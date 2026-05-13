@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+    
 import java.util.List;
 
 @RestController
@@ -99,6 +99,11 @@ public class ProductController {
     public ResponseEntity<ProductCartDto> getCartProduct(@PathVariable Long id) {
         ProductCartDto dto = productService.getCartProductById(id);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Product Service Running");
     }
 
 }

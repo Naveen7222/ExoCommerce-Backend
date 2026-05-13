@@ -52,4 +52,9 @@ public class CartController {
         cartService.updateQuantity(userId, productId, request.getQuantity());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Cart Service is running");
+    }
 }

@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: ${PORT:8084}
 
 spring:
   application:
@@ -9,12 +9,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          secret-key: EXO_SECRET_KEY_123_EXO_SECRET_KEY_123
+          secret-key: ${JWT_SECRET}
 
   datasource:
-    url: jdbc:mysql://localhost:3306/orders_db
-    username: exo_user
-    password: root123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -30,4 +30,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
+
+  instance:
+    prefer-ip-address: true
